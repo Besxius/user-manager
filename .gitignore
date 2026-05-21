@@ -1,0 +1,86 @@
+# Visual Studio / Visual Studio Code / Rider
+# Core build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Re]leases/
+x64/
+x86/
+bld/
+[Bin]/
+[Obj]/
+
+# .NET Core / ASP.NET Core specific
+bin/
+obj/
+
+# Cấu hình môi trường (Bỏ ghi chú nếu chứa thông tin nhạy cảm)
+appsettings.Development.json
+appsettings.Production.json
+*.secrets.json
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio / VS Code / Rider cache và cấu hình IDE
+.vs/
+.vscode/
+# Bỏ ghi chú nếu bạn không muốn commit cấu hình extensions của VS Code
+#.vscode/extensions.json
+.idea/
+*.sln.iml
+*.ntvs*
+*.njsproj
+*.sln.swp
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Resharper / Rider
+_ReSharper*/
+*.[Re]Sharper.user
+*.DotMap.user
+
+# Crash dumps
+*.dmp
+*.mdmp
+
+# Operating System Files
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Log files
+*.log
+logs/
+Log/
+Log.*/
+
+# Local History for Visual Studio Code
+.history/
+
+# Frontend dependencies (Nếu bạn gộp chung React/Next.js vào cùng repo Web API)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
