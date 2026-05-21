@@ -25,7 +25,10 @@ namespace UserManager.Application
             {
                 cfg.RegisterServicesFromAssembly(assembly);
 
-                // Đăng ký ValidationBehavior để nó chạy trước mỗi Request
+                // Đăng ký Logging Behavior
+                cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(CommandLoggingBehavior<,>));
+
+                // Đăng ký ValidationBehavior
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             });
 

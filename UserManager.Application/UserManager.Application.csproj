@@ -15,4 +15,10 @@
     <PackageReference Include="MediatR" Version="14.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\DTOs\" />
+    <Folder Include="Features\Admin\Commands\" />
+    <Folder Include="Features\Auth\Queries\" />
+  </ItemGroup>
+
 </Project>

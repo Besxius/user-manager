@@ -3,30 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UserManager.Domain.Constants;
 
 namespace UserManager.Domain.Entities
 {
     public class User
     {
         public string Id { get; private set; }
-        public string Username { get; private set; }
         public string Email { get; private set; }
+        public string PasswordHash { get; private set; }
+        public string RoleId { get; private set; }
+        public string Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
-        public User(string username, string email)
+        public User(string email, string passwordHash, string roleId)
         {
             Id = Guid.NewGuid().ToString();
-            Username = username;
             Email = email;
+            PasswordHash = passwordHash;
+            RoleId = roleId;
+            Status = UserStatuses.Active;
             CreatedAt = DateTime.UtcNow;
         }
 
-        public void UpdateEmail(string newEmail)
-        {
-            if (string.IsNullOrWhiteSpace(newEmail))
-                throw new ArgumentException("Email is required");
-
-            Email = newEmail;
-        }
+        public void ChangeRole(string newRoleId) => RoleId = newRoleId;
+        public void LockAccount() => Status = UserStatuses.Locked;
+        public void UnlockAccount() => Status = UserStatuses.Active;
     }
 }

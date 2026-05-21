@@ -11,5 +11,7 @@ namespace UserManager.Infrastructure.Persistence
         public string ConnectionString { get; set; } = null!;
         public string DatabaseName { get; set; } = null!;
         public string UsersCollectionName { get; set; } = null!;
+        public string UserProfilesCollectionName { get; set; } = null!;
+        public string RolesCollectionName { get; set; } = null!;
     }
 }

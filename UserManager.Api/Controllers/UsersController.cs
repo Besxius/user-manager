@@ -1,13 +1,20 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using UserManager.Application.Features.Users.Commands.CreateUser;
-using UserManager.Application.Features.Users.Queries.GetAllUsers;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using UserManager.Application.Features.Users.Commands.CreateProfile;
+using UserManager.Application.Features.Users.Commands.UpdateProfile;
+using UserManager.Application.Features.Users.Queries.GetMyProfile;
+using UserManager.Domain.Constants;
+using UserManager.Domain.Entities;
 
 namespace UserManager.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = UserRoles.User)]
     public class UsersController : ControllerBase
     {
         private readonly ISender _mediator;
@@ -17,25 +24,50 @@ namespace UserManager.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateUser(
-            [FromBody] CreateUserCommand command,
-            CancellationToken cancellationToken) 
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetUserById(CancellationToken cancellationToken)
         {
-            // MediatR sẽ truyền Token này vào Pipeline Behavior và Handler
+            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var query = new GetMyProfileQuery(userId!);
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPost("profile")]
+        public async Task<IActionResult> CreateProfile([FromBody] CreateProfileRequest request, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? throw new UnauthorizedAccessException("UserId is not found");
+
+            var command = new CreateProfileCommand(
+                userId,
+                request.FullName,
+                request.DateOfBirth,
+                request.Gender,
+                request.Address);
+
             var result = await _mediator.Send(command, cancellationToken);
-
-            return CreatedAtAction(nameof(CreateUser), new { id = result }, result);
+            return Created($"api/users/profile", new { ProfileId = result });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken)
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken)
         {
-            var query = new GetAllUsersQuery();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? throw new UnauthorizedAccessException("UserId is not found");
 
-            var users = await _mediator.Send(query, cancellationToken);
+            var command = new CreateProfileCommand(
+                userId,
+                request.FullName,
+                request.DateOfBirth,
+                request.Gender,
+                request.Address);
 
-            return Ok(users);
+            var result = await _mediator.Send(command, cancellationToken);
+            return NoContent();
         }
+
     }
 }
