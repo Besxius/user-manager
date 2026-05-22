@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,39 @@ namespace UserManager.Infrastructure.Repositories
         public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
         {
             await _users.DeleteOneAsync(u => u.Id == id, cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<User>> GetFilteredAsync(string? roleId, string? status, IEnumerable<string>? userIds, CancellationToken cancellationToken = default)
+        {
+            var builder = Builders<User>.Filter;
+            var filter = builder.Empty;
+
+            if (!string.IsNullOrEmpty(roleId))
+                filter &= builder.Eq(u => u.RoleId, roleId);
+
+            if (!string.IsNullOrEmpty(status))
+                filter &= builder.Eq(u => u.Status, status);
+
+            if (userIds != null)
+                filter &= builder.In(u => u.Id, userIds);
+
+            return await _users.Find(filter).ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<User>> SearchAsync(string searchTerm, CancellationToken cancellationToken = default)
+        {
+            var builder = Builders<User>.Filter;
+            var filter = builder.Or(
+                builder.Eq(u => u.Id, searchTerm),
+                builder.Regex(u => u.Email, new BsonRegularExpression(searchTerm, "i"))
+            );
+
+            return await _users.Find(filter).ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<User>> GetByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+        {
+            return await _users.Find(u => ids.Contains(u.Id)).ToListAsync(cancellationToken);
         }
     }
 }

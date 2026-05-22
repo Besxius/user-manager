@@ -35,7 +35,7 @@ namespace UserManager.Api.Controllers
             CancellationToken cancellationToken)
         {
             var token = await _sender.Send(command, cancellationToken);
-            return Ok(token);
+            return Ok(new { accessToken = token} );
         }
     }
 }

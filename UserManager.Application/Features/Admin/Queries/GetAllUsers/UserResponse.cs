@@ -11,5 +11,9 @@ namespace UserManager.Application.Features.Admin.Queries.GetAllUsers
         string Email,
         string RoleId,
         string Status,
-        DateTime CreatedAt);
+        DateTime CreatedAt,
+        string FullName,
+        DateTime DateOfBirth,
+        string Gender,
+        string Address);
 }

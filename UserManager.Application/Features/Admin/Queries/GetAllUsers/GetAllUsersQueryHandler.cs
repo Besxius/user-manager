@@ -13,22 +13,42 @@ namespace UserManager.Application.Features.Admin.Queries.GetAllUsers
     public class GetAllUsersQueryHandler : IQueryHandler<GetAllUsersQuery, IReadOnlyList<UserResponse>>
     {
         private readonly IUserRepository _userRepository;
+        private readonly IUserProfileRepository _userProfileRepository;
 
-        public GetAllUsersQueryHandler(IUserRepository userRepository)
+        public GetAllUsersQueryHandler(IUserRepository userRepository, IUserProfileRepository userProfileRepository)
         {
             _userRepository = userRepository;
+            _userProfileRepository = userProfileRepository;
         }
 
-        public async Task<IReadOnlyList<UserResponse>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<UserResponse>> Handle(GetAllUsersQuery query, CancellationToken cancellationToken)
         {
-            var users =  await _userRepository.GetAllAsync(cancellationToken);
+            var usersTask = _userRepository.GetAllAsync(cancellationToken);
+            var profilesTask = _userProfileRepository.GetAllAsync(cancellationToken);
 
-            return users.Select(user => new UserResponse(
-                user.Id,
-                user.Email,
-                user.RoleId,
-                user.Status,
-                user.CreatedAt)).ToList();
+            await Task.WhenAll(usersTask, profilesTask);
+
+            var users = usersTask.Result.Where(u => u.Id != query.CurrentUserId).ToList();
+            var profiles = profilesTask.Result;
+
+            var profileDictionary = profiles.ToDictionary(p => p.UserId);
+
+            return users.Select(user =>
+            {
+                profileDictionary.TryGetValue(user.Id, out var profile);
+
+                return new UserResponse(
+                    user.Id,
+                    user.Email,
+                    user.RoleId,
+                    user.Status,
+                    user.CreatedAt,
+                    profile?.FullName ?? string.Empty,            
+                    profile?.DateOfBirth ?? default(DateTime), 
+                    profile?.Gender ?? string.Empty,
+                    profile?.Address ?? string.Empty
+                );
+            }).ToList();
         }
     }
 }

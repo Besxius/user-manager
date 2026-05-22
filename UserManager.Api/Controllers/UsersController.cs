@@ -27,8 +27,8 @@ namespace UserManager.Api.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> GetUserById(CancellationToken cancellationToken)
         {
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            var query = new GetMyProfileQuery(userId!);
+            var currentUserId = GetCurrentUserId();
+            var query = new GetMyProfileQuery(currentUserId!);
             var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }
@@ -36,12 +36,10 @@ namespace UserManager.Api.Controllers
         [HttpPost("profile")]
         public async Task<IActionResult> CreateProfile([FromBody] CreateProfileRequest request, CancellationToken cancellationToken)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                ?? throw new UnauthorizedAccessException("UserId is not found");
+            var currentUserId = GetCurrentUserId();
 
             var command = new CreateProfileCommand(
-                userId,
+                currentUserId,
                 request.FullName,
                 request.DateOfBirth,
                 request.Gender,
@@ -54,12 +52,10 @@ namespace UserManager.Api.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                ?? throw new UnauthorizedAccessException("UserId is not found");
+            var currentUserId = GetCurrentUserId();
 
-            var command = new CreateProfileCommand(
-                userId,
+            var command = new UpdateProfileCommand(
+                currentUserId,
                 request.FullName,
                 request.DateOfBirth,
                 request.Gender,
@@ -69,5 +65,11 @@ namespace UserManager.Api.Controllers
             return NoContent();
         }
 
+        private string GetCurrentUserId()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? throw new UnauthorizedAccessException("UserId is not found");
+        }
     }
 }

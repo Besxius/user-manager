@@ -19,6 +19,11 @@ namespace UserManager.Infrastructure.Repositories
             _roles = context.GetCollection<Role>(settings.Value.RolesCollectionName);
         }
 
+        public async Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _roles.Find(_ => true).ToListAsync(cancellationToken);
+        }
+
         public async Task<Role> GetByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             return await _roles.Find(r => r.Id == id).FirstOrDefaultAsync(cancellationToken);

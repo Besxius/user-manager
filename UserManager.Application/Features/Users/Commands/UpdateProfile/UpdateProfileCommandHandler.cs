@@ -23,14 +23,12 @@ namespace UserManager.Application.Features.Users.Commands.UpdateProfile
             var user = await _userRepository.GetByIdAsync(command.UserId, cancellationToken);
             if (user == null) throw new Exception("User does not exist.");
 
-            var profile = new UserProfile(
-                command.UserId,
-                command.FullName,
-                command.DateOfBirth,
-                command.Gender,
-                command.Address);
+            var profile = await _userProfileRepository.GetByUserIdAsync(command.UserId, cancellationToken);
+            if (profile == null) throw new Exception("Profile does not exist. Please create profile first.");
 
-            await _userProfileRepository.AddAsync(profile, cancellationToken);
+            profile.UpdateInfo(command.FullName, command.DateOfBirth, command.Gender, command.Address);
+
+            await _userProfileRepository.UpdateAsync(profile, cancellationToken);
 
             return true;
         }

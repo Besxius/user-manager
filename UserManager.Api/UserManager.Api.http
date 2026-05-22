@@ -1,6 +1,107 @@
-@UserManager.Api_HostAddress = http://localhost:5078
+﻿@HostAddress = https://localhost:7034
 
-GET {{UserManager.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+@TargetUserId = 83fce2fa-0921-46d0-9d56-228d0d7a92ea
+@TargetRoleId = be92ce74-6d0a-4d9a-8908-8c5c591b2690
 
-###
+### =========================================================================
+### LUỒNG 1: KỊCH BẢN KIỂM THỬ CHO ADMIN (ADMIN FLOW)
+### =========================================================================
+
+### 1. Admin đăng nhập hệ thống để lấy Token
+# @name loginAdmin
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@yourdomain.com",
+  "password": "Admin@123"
+}
+
+### 2. Admin lấy danh sách toàn bộ người dùng
+GET {{HostAddress}}/api/admin/users
+Authorization: Bearer {{loginAdmin.response.body.$.accessToken}}
+
+### 3. Admin lấy danh sách tất cả các quyền (Roles) hệ thống
+GET {{HostAddress}}/api/admin/roles
+Authorization: Bearer {{loginAdmin.response.body.$.accessToken}}
+
+### 4. Admin lọc danh sách người dùng theo trạng thái tài khoản bị khóa
+GET {{HostAddress}}/api/admin/users/filter?status=Inactive
+Authorization: Bearer {{loginAdmin.response.body.$.accessToken}}
+
+### 5. Admin tìm kiếm người dùng theo từ khóa tên hoặc email
+GET {{HostAddress}}/api/admin/users/search?searchTerm=trong
+Authorization: Bearer {{loginAdmin.response.body.$.accessToken}}
+
+### 6. Admin cập nhật trạng thái tài khoản người dùng
+PUT {{HostAddress}}/api/admin/users/{{TargetUserId}}/status
+Authorization: Bearer {{loginAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "userId": "{{TargetUserId}}", 
+  "status": "Active"
+}
+
+### 7. Admin thay đổi phân quyền tài khoản người dùng
+PUT {{HostAddress}}/api/admin/users/{{TargetUserId}}/roles
+Authorization: Bearer {{loginAdmin.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "userId": "{{TargetUserId}}",
+  "roleId": "{{TargetRoleId}}"
+}
+
+
+### =========================================================================
+### LUỒNG 2: KỊCH BẢN KIỂM THỬ CHO NGƯỜI DÙNG MỚI (USER FLOW)
+### =========================================================================
+
+### 1. Khách hàng đăng ký tài khoản mới
+POST {{HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "newuser@yourdomain.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+### 2. Người dùng mới đăng nhập để lấy Token hoạt động
+# @name loginUser
+POST {{HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "newuser@yourdomain.com",
+  "password": "Password123!"
+}
+
+### 3. Người dùng mới thiết lập thông tin Profile lần đầu
+POST {{HostAddress}}/api/users/profile
+Authorization: Bearer {{loginUser.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van A",
+  "dateOfBirth": "2000-01-01T00:00:00Z",
+  "gender": "male",
+  "address": "Ha Noi"
+}
+
+### 4. Người dùng lấy thông tin Profile hiện tại của mình
+GET {{HostAddress}}/api/users/profile
+Authorization: Bearer {{loginUser.response.body.$.accessToken}}
+
+### 5. Người dùng cập nhật thay đổi thông tin cá nhân
+PUT {{HostAddress}}/api/users/profile
+Authorization: Bearer {{loginUser.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van A (Updated)",
+  "dateOfBirth": "2000-01-01T00:00:00Z",
+  "gender": "male",
+  "address": "Da Nang"
+}

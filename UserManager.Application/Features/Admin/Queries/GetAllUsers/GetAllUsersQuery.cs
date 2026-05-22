@@ -9,5 +9,5 @@ using UserManager.Domain.Entities;
 
 namespace UserManager.Application.Features.Admin.Queries.GetAllUsers
 {
-    public sealed record GetAllUsersQuery : IQuery<IReadOnlyList<UserResponse>>;
+    public sealed record GetAllUsersQuery(string CurrentUserId) : IQuery<IReadOnlyList<UserResponse>>;
 }
