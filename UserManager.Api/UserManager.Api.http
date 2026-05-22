@@ -1,7 +1,7 @@
 ﻿@HostAddress = https://localhost:7034
 
-@TargetUserId = 83fce2fa-0921-46d0-9d56-228d0d7a92ea
-@TargetRoleId = be92ce74-6d0a-4d9a-8908-8c5c591b2690
+@TargetUserId = 2476f547-6dc0-4249-a1a2-0b3f1144ee2e // Đổi Id này theo Id có trong db
+@TargetRoleId = 80ddfd62-a865-403f-908c-9f3df5e2fcee // Đổi Id này theo Id có trong db
 
 ### =========================================================================
 ### LUỒNG 1: KỊCH BẢN KIỂM THỬ CHO ADMIN (ADMIN FLOW)
