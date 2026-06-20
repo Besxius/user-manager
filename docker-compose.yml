@@ -1,0 +1,31 @@
+services:
+  # 1. Cấu hình Database MongoDB
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: usermanager-mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=Tl123456
+    ports:
+      - "27018:27017" # Ánh xạ cổng ra máy thật để bạn dùng la bàn hiển thị (Compass, DBeaver)
+    volumes:
+      - mongo_data:/data/db # Giữ lại dữ liệu không bị mất khi tắt container
+
+  # 2. Cấu hình ứng dụng Web API
+  webapi:
+    image: usermanager-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: usermanager-api-container
+    ports:
+      - "5000:8080" # Gọi API từ máy thật qua cổng 5000
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # CHÚ Ý: 'mongodb' trong chuỗi kết nối chính là tên của service database ở phía trên
+      - ConnectionStrings__MongoConnection=mongodb://root:Tl123456@mongodb:27017/UserManagerDb?authSource=admin
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo_data:
