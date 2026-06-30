@@ -1,162 +1,81 @@
-\# UserManager - ASP.NET Core Web API
-
-
-
-Dự án \*\*UserManager\*\* là một hệ thống RESTful API cung cấp các chức năng quản lý người dùng, phân quyền và xác thực. Dự án được xây dựng trên nền tảng \*\*.NET 8\*\* và tuân thủ nghiêm ngặt mô hình \*\*Clean Architecture\*\*, kết hợp cùng các Design Pattern phổ biến nhằm đảm bảo tính dễ bảo trì, dễ mở rộng và dễ kiểm thử.
-
-
-
-\## 🚀 Công nghệ \& Thư viện sử dụng
-
-\- \*\*Framework:\*\* .NET 8 (ASP.NET Core Web API)
-
-\- \*\*Database:\*\* MongoDB
-
-\- \*\*Architecture:\*\* Clean Architecture
-
-\- \*\*Design Patterns:\*\* CQRS, Mediator Pattern, Repository Pattern
-
-\- \*\*Thư viện chính:\*\*
-
-&#x20; - `MediatR` (Triển khai CQRS \& Mediator)
-
-&#x20; - `MongoDB.Driver` (Giao tiếp cơ sở dữ liệu)
-
-&#x20; - Xác thực JWT (JSON Web Token)
-
-&#x20; - Xử lý mật khẩu an toàn với Hashing
-
-
-
-\---
-
-
-
-\## 🏗️ Cấu trúc Kiến trúc (Clean Architecture)
-
-
-
-Dự án được chia thành 4 lớp (layers) chính, phụ thuộc theo nguyên tắc hướng vào trung tâm (Dependency Rule):
-
-
-
-\### 1. 🟡 `UserManager.Domain` (Lớp Cốt lõi)
-
-Nơi chứa các quy tắc nghiệp vụ cốt lõi nhất, không phụ thuộc vào bất kỳ thư viện hay framework ngoại vi nào.
-
-\- \*\*Entities:\*\* `User`, `Role`, `UserProfile`
-
-\- \*\*Constants:\*\* `UserRoles`, `UserStatuses`
-
-\- \*\*Repositories Interfaces:\*\* `IUserRepository`, `IRoleRepository`, `IUserProfileRepository` (Chỉ định nghĩa contract, không triển khai).
-
-
-
-\### 2. 🟢 `UserManager.Application` (Lớp Ứng dụng)
-
-Chứa toàn bộ logic ứng dụng (Use cases), điều phối dữ liệu giữa tầng Domain và giao diện.
-
-\- \*\*CQRS (Features):\*\* Phân chia rõ ràng các nghiệp vụ thành `Commands` (Ghi/Sửa/Xóa dữ liệu) và `Queries` (Đọc dữ liệu) bằng `MediatR`. Ví dụ: `Auth`, `Users`, `Admin`.
-
-\- \*\*Pipeline Behaviors:\*\* Middleware xử lý logic cắt ngang như `ValidationBehavior`, `CommandLoggingBehavior`.
-
-\- \*\*Abstractions:\*\* Định nghĩa Interface cho các dịch vụ ngoại vi (`IJwtProvider`, `IPasswordHasher`).
-
-
-
-\### 3. 🔵 `UserManager.Infrastructure` (Lớp Hạ tầng)
-
-Nơi triển khai các công nghệ cụ thể và giao tiếp với bên ngoài. Lớp này phụ thuộc vào Application và Domain.
-
-\- \*\*Persistence (MongoDB):\*\* Cấu hình `MongoDbContext`, `MongoDbSettings` và tự động khởi tạo dữ liệu mẫu (`MongoDataSeeder`).
-
-\- \*\*Repositories:\*\* Triển khai thực tế các interface truy xuất dữ liệu MongoDB.
-
-\- \*\*Security:\*\* Triển khai tạo token (`JwtProvider`) và mã hóa mật khẩu (`PasswordHasher`).
-
-
-
-\### 4. 🔴 `UserManager.Api` (Lớp Trình bày)
-
-Điểm vào của ứng dụng (Entry point), tiếp nhận các HTTP Request từ client.
-
-\- \*\*Controllers:\*\* Giao tiếp với người dùng qua `AuthController`, `UsersController`, `AdminController`.
-
-\- \*\*Middlewares:\*\* Bắt và xử lý lỗi tập trung qua `GlobalExceptionMiddleware`.
-
-\- \*\*Configuration:\*\* Cấu hình Dependency Injection, Authentication và AppSettings.
-
-
-
-\---
-
-
-
-\## ✨ Các tính năng chính (Features)
-
-
-
-\### 🛡️ Authentication \& Authorization
-
-\- Đăng ký và Đăng nhập.
-
-\- Bảo mật API bằng JWT Bearer Token.
-
-\- Phân quyền truy cập dựa trên Role (`Admin`, `User`).
-
-
-
-\### 👤 User Management (Dành cho Role: User)
-
-\- Lấy thông tin hồ sơ cá nhân (Profile).
-
-\- Cập nhật hồ sơ cá nhân (FullName, DateOfBirth, Gender, Address).
-
-
-
-\### ⚙️ Admin Management (Dành cho Role: Admin)
-
-\- Lấy danh sách toàn bộ người dùng và hệ thống quyền (Roles).
-
-\- Lọc người dùng theo nhiều tiêu chí (Role, Status, Gender).
-
-\- Tìm kiếm người dùng qua tên hoặc email.
-
-\- Khóa/Mở khóa tài khoản (Cập nhật Status).
-
-\- Phân quyền lại cho người dùng (Cập nhật Role).
-
-
-
-\---
-
-
-
-\## 🛠️ Hướng dẫn cài đặt và Chạy dự án
-
-
-
-\### 1. Yêu cầu hệ thống
-
-\- \[.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-
-\- \[MongoDB](https://www.mongodb.com/try/download/community) (Đang chạy dưới máy local hoặc URI dạng Cloud - MongoDB Atlas)
-
-\- Visual Studio 2022 hoặc VS Code.
-
-
-
-\### 2. Cấu hình Database
-
-Mở file `appsettings.Development.json` hoặc `appsettings.json` tại thư mục `UserManager.Api` và đảm bảo kết nối MongoDB chính xác:
+# UserManager API
+
+## Overview
+UserManager is an enterprise-grade RESTful web API engineered to provide secure user management, fine-grained role-based access control, and identity verification services. Developed on the .NET 8 framework, the platform strictly complies with Clean Architecture principles and incorporates Command Query Responsibility Segregation (CQRS) alongside advanced structural design patterns to ensure decoupled maintenance, high scalability, and seamless unit testing execution.
+
+## System Architecture
+The solution enforces a strict inner-directed dependency flow (The Dependency Rule), separating core business rules from external framework volatile infrastructures across four distinct layers:
+
+### 1. UserManager.Domain
+The structural core of the application, completely isolated from external frameworks, libraries, and runtime dependencies.
+* **Entities:** Core domain schemas including User, Role, and UserProfile.
+* **Constants:** Structural domain definitions such as UserRoles and UserStatuses.
+* **Abstractions:** Pure contract specifications including IUserRepository, IRoleRepository, and IUserProfileRepository.
+
+### 2. UserManager.Application
+Encapsulates all orchestration and user-case automation behavior, serving as the mediator between presentation models and domain variants.
+* **CQRS Implementations:** Business workflows are segregated cleanly into standalone Commands (write mutations) and Queries (idempotent read evaluations) using MediatR.
+* **Cross-Cutting Pipelines:** Middleware behaviors such as ValidationBehavior and CommandLoggingBehavior capture requests to process pre-execution constraints seamlessly.
+* **External Abstractions:** Interfaces defined for decoupled identity management and security layers (IJwtProvider, IPasswordHasher).
+
+### 3. UserManager.Infrastructure
+Implements technological adapters, handles physical database persistence, and integrates external utility frameworks.
+* **MongoDB Persistence:** Configures low-level operational layers including MongoDbContext and MongoDbSettings, supported by an automated programmatic seeder (MongoDataSeeder).
+* **Repository Implementation:** Concrete data mappings executing optimized aggregations against MongoDB database structures.
+* **Security & Cryptography:** Direct implementation of JwtProvider for token issuance and PasswordHasher leveraging cryptographic standard hashing configurations.
+
+### 4. UserManager.Api
+The boundary presentation layer acting as the host entry point for managing routing architectures and client-side web requests.
+* **Controllers:** High-performance RESTful structures categorized into AuthController, UsersController, and AdminController.
+* **Global Error Middleware:** Intercepts out-of-band application exceptions via GlobalExceptionMiddleware to unify standard payload structures for client error states.
+* **Configuration Setup:** Manages inversion-of-control container configurations, middleware orchestration, and authentication policy bindings.
+
+## Functional Features
+
+### Security and Identity Operations
+* Structured user authentication containing secure registration and credentials validation pipelines.
+* Protected communication contexts guarded by industry-standard JWT Bearer Token validation handlers.
+* Decoupled access barriers enforcing role-based verification filters tailored for explicit User and Admin clearance levels.
+
+### User Profile Management
+* On-demand profile metadata extraction interfaces.
+* Dynamic demographic information update workflows allowing customization of FullName, DateOfBirth, Gender, and Address.
+
+### Administration Control Network
+* Full visibility into application membership matrices and the global authorization roles network.
+* Multicriteria filtering pipelines allowing data extractions by Role, Status, and Gender.
+* Indexed identity query utilities targeting specific string matches for names or system emails.
+* Account lifecycle management enabling immediate platform suspension or activation modifications.
+* Administrative privilege assignment routines to update specific user identity tokens dynamically.
+
+## Technology Stack and Core Libraries
+* **Framework:** .NET Core 8.0 (ASP.NET Core Web API)
+* **Database Target:** MongoDB Server Engine
+* **CQRS Engine:** MediatR framework
+* **Database Driver:** MongoDB.Driver official client library
+* **Validation Middleware:** FluentValidation framework integration
+
+---
+
+## Installation and Execution Guide
+
+### Prerequisites
+* .NET 8.0 Software Development Kit (SDK) environment initialized local.
+* Active MongoDB service instance running locally or hosted securely on MongoDB Atlas.
+* Supported IDE workspace (Visual Studio 2022 or Visual Studio Code).
+
+### 1. Database Connection Properties
+Access the configuration mapping infrastructure within `UserManager.Api/appsettings.json` or `appsettings.Development.json` and adjust the MongoDB parameters to align with your setup:
 
 ```json
-
-"MongoDbSettings": {
-
-&#x20; "ConnectionString": "mongodb://localhost:27017",
-
-&#x20; "DatabaseName": "UserManagerDb"
-
+{
+  "MongoDbSettings": {
+    "ConnectionString": "mongodb://localhost:27017",
+    "DatabaseName": "UserManagerDb"
+  },
+  "JwtSettings": {
+    "Secret": "your_secure_cryptographic_jwt_key_configuration",
+    "Issuer": "UserManagerApi",
+    "Audience": "UserManagerClients"
+  }
 }
-
